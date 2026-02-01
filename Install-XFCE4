@@ -1,0 +1,54 @@
+cd /tmp
+echo "###################################################"
+echo "[01/3] XFCE4  Desktop Database..."
+echo "{ lftp -c 'slackware.uk' }"
+echo "###################################################"
+sleep 3
+lftp -c "open https://slackware.uk/salix/x86_64/ ; mirror --exclude source/ --include salix/ xfce4.20-15.0"
+cd /tmp
+echo
+echo
+echo "###################################################"
+echo "[02/3] Upgrading XFCE4 Packages..."
+echo "{ installpkg *.t?z }"
+echo "###################################################"
+sleep 3
+cd xfce4.20-15.0/
+ls
+cd salix/l/
+installpkg *.t?z
+cd /tmp
+cd xfce4.20-15.0/ 
+ls
+cd salix/x/
+installpkg *.t?z
+cd /tmp
+cd xfce4.20-15.0/
+ls
+cd salix/xfce/
+installpkg *.t?z
+echo
+echo
+echo "###################################################"
+echo "[03/3] Remove mirror xfce4.20-15.0"
+echo "###################################################"
+sleep 3
+cd /tmp
+rm -rf xfce4.20-15.0
+echo
+echo
+echo
+echo "#########################################"
+echo "##                                     ##"
+echo "##    UPGRADING-PROCESS IS FINSIHED    ##"
+echo "##                                     ##"
+echo "#########################################"
+sleep 6
+exit
+sleep 6
+exit
+
+
+
+
+

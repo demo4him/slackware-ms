@@ -1,0 +1,40 @@
+cd /tmp
+echo "###################################################"
+echo "[01/3] Installing CINNAMON Desktop Database..."
+echo "{ lftp -c 'slackware.uk' }"
+echo "###################################################"
+sleep 3
+lftp -c "open https://slackware.uk/csb/15.0/; mirror x86_64"
+cd /tmp
+echo
+echo
+echo
+echo "###################################################"
+echo "[02/3] Installing CINNAMON Packages..."
+echo "{ installpkg */*.t?z  }"
+echo "###################################################"
+sleep 3
+cd x86_64/
+echo
+installpkg *.t?z
+echo
+echo "###################################################"
+echo "[03/3] Remove mirror CINNAMON Desktop"
+echo "###################################################"
+sleep 3
+cd /tmp
+rm -rf x86_64
+echo
+echo
+echo
+echo "#########################################"
+echo "##                                     ##"
+echo "##    INSTALLING-PROCESS IS FINSIHED    ##"
+echo "##                                     ##"
+echo "#########################################"
+sleep 6
+exit
+sleep 6
+exit
+
+

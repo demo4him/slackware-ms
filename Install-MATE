@@ -1,0 +1,54 @@
+cd /tmp
+echo "###################################################"
+echo "[01/3] Updating Mate Desktop Database..."
+echo "{ lftp -c 'slackware.uk' }"
+echo "###################################################"
+sleep 3
+lftp -c "open http://slackware.uk/msb/15.0/latest/ ; mirror x86_64"
+cd /tmp
+echo
+echo
+echo "###################################################"
+echo "[02/3] Upgrading MSB Packages..."
+echo "{  upgradepkg --install-new *.t?z }"
+echo "###################################################"
+sleep 3
+cd x86_64/
+ls
+cd deps
+upgradepkg --install-new *.t?z
+cd /tmp
+cd x86_64/
+ls
+cd base
+upgradepkg --install-new *.t?z
+cd /tmp
+cd x86_64/
+ls
+cd extra
+upgradepkg --install-new *.t?z
+echo
+echo
+echo "###################################################"
+echo "[03/3] Remove mirror x86_64"
+echo "###################################################"
+sleep 3
+cd /tmp
+rm -rf x86_64
+echo
+echo
+echo
+echo "#########################################"
+echo "##                                     ##"
+echo "##    UPGRADING-PROCESS IS FINSIHED    ##"
+echo "##                                     ##"
+echo "#########################################"
+sleep 6
+exit
+sleep 6
+exit
+
+
+
+
+

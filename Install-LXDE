@@ -1,0 +1,40 @@
+cd /tmp
+echo "###################################################"
+echo "[01/3] Installing LXDE Desktop Database..."
+echo "{ lftp -c 'ponce.cc' }"
+echo "###################################################"
+sleep 3
+lftp -c "open http://ponce.cc/slackware/slackware64-15.0/; mirror lxde"
+cd /tmp
+echo
+echo
+echo
+echo "###################################################"
+echo "[02/3] Installing LXDE Packages..."
+echo "{ installpkg */*.t?z  }"
+echo "###################################################"
+sleep 3
+cd lxde/
+echo
+installpkg *.t?z
+echo
+echo "###################################################"
+echo "[03/3] Remove mirror LXDE Desktop"
+echo "###################################################"
+sleep 3
+cd /tmp
+rm -rf lxde
+echo
+echo
+echo
+echo "#########################################"
+echo "##                                     ##"
+echo "##    INSTALLING-PROCESS IS FINSIHED    ##"
+echo "##                                     ##"
+echo "#########################################"
+sleep 6
+exit
+sleep 6
+exit
+
+
