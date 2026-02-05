@@ -74,7 +74,7 @@ metamail:SKP
 mobile-broadband-provider-info:ADD
 mtr:SKP
 mutt:SKP
-nc:SKP
+nc:ADD
 ncftp:SKP
 net-snmp:ADD
 net-tools:ADD
