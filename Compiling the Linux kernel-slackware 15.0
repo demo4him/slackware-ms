@@ -3,7 +3,7 @@ AS ROOT
 cd /usr/src
 
 2.
-wget kernel.org... # e.g.
+wget kernel.org... # e.g. linux-6.12.68.tar.xz
 
 tar -xvf linux-6.12.68.tar.xz
 
@@ -17,7 +17,7 @@ make clean && make mrproper
 4.
 make localmodconfig
 
-5. # add -ms in my case on config window/general items and on multimedia check [M]
+5. # I add -ms just in my case on config window/general items and on multimedia check [M]
 make menuconfig
 
 6. # numbers of cores
@@ -62,7 +62,7 @@ ls
 19.
 ./mkinitrd_command_generator.sh
 
-20. #copy
+20. # I copy in my case
 mkinitrd -c -k 6.12.68-ms -f ext4 -r /dev/sda3 -m usb-storage:xhci-hcd:xhci-pci:ohci-pci:ehci-pci:uhci-hcd:ehci-hcd:hid:usbhid:i2c-hid:hid_generic:hid-asus:hid-cherry:hid-logitech:hid-logitech-dj:hid-logitech-hidpp:hid-lenovo:hid-microsoft:hid_multitouch:ext4 -u -o /boot/initrd.gz
 
 21.
@@ -77,4 +77,6 @@ mkinitrd -c -k 6.12.68-ms -f ext4 -r /dev/sda3 -m ext4
 grub-mkconfig -o /boot/grub/grub.cfg
 
 reboot
-  
+
+24. # download and install
+https://mirrors.slackware.com/slackware/slackware64-current/slackware64/d/kernel-headers-6.12.69-x86-1.txz
