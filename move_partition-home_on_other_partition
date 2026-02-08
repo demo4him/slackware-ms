@@ -37,7 +37,7 @@ For example, add the second line at the end of the last line or underneath to ne
 
 UUID=439c3001-eaf6-4fec-acce-84da692361c0    /DATA    ext4    defaults   0  2
 UUID=439c3001-eaf6-4fec-acce-84da692361c0    /home    ext4    defaults   0  2
-
+*DATA or other name you chosen of partition from the other disk
 
 Take care to choose the appropriate filesystem here, e.g. ext3/4 if ext3/4 formatted
 5. Reboot
