@@ -17,7 +17,7 @@ make clean && make mrproper
 4.
 make localmodconfig
 
-5. # I add -ms just in my case on config window/general items and on multimedia check [M]
+5. # I add -ms just in my case on config window/general items and on multimedia I checked [M]
 make menuconfig
 
 6. # numbers of cores
