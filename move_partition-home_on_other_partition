@@ -33,7 +33,7 @@ Note or copy/paste the correct UUID to edit your fstab with
 
 sudo nano /etc/fstab   
 
-For example, add the following line at the end:
+For example, add the second line at the end of the last line or underneath to new disk/space partition of /home:
 
 UUID=439c3001-eaf6-4fec-acce-84da692361c0    /DATA    ext4    defaults   0  2
 UUID=439c3001-eaf6-4fec-acce-84da692361c0    /home    ext4    defaults   0  2
