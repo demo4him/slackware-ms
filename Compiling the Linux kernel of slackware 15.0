@@ -79,4 +79,4 @@ grub-mkconfig -o /boot/grub/grub.cfg
 reboot
 
 24. # download and install
-https://mirrors.slackware.com/slackware/slackware64-current/slackware64/d/kernel-headers-6.12.69-x86-1.txz
+https://mirrors.slackware.com/slackware/slackware64-current/slackware64/d/kernel-headers-6.12.6?-x86-1.txz
