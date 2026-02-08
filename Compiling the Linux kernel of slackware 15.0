@@ -70,7 +70,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 reboot
 
-22.
+22. # ext4 or your format; /dev/sd?? according to lsblk for your / partition
 mkinitrd -c -k 6.12.68-ms -f ext4 -r /dev/sda3 -m ext4
 
 23.
