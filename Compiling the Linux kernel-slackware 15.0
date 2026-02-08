@@ -1,0 +1,80 @@
+AS ROOT
+1.
+cd /usr/src
+
+2.
+wget kernel.org... # e.g.
+
+tar -xvf linux-6.12.68.tar.xz
+
+rm linux-6.12.68.tar.xz
+
+cd /usr/src/linux-6.12.68
+
+3.
+make clean && make mrproper
+
+4.
+make localmodconfig
+
+5. # add -ms in my case on config window/general items and on multimedia check [M]
+make menuconfig
+
+6. # numbers of cores
+make -j6 # 6 in my case
+
+7.
+make modules_install
+
+8.
+cp arch/x86/boot/bzImage /boot/vmlinuz-ms-6.12.68
+
+9.
+cp System.map /boot/System.map-ms-6.12.68
+
+10.
+cp .config /boot/config-ms-6.12.68
+
+11.
+cd /boot
+
+12.
+ln -sf vmlinuz-ms-6.12.68 vmlinuz
+
+13.
+ln -sf System.map-ms-6.12.68 System.map
+
+14.
+ln -sf config-ms-6.12.68 config
+
+15.
+grub-mkconfig -o /boot/grub/grub.cfg
+
+16.
+reboot
+
+17.
+cd /usr/share/mkinitrd
+
+18.
+ls
+
+19.
+./mkinitrd_command_generator.sh
+
+20. #copy
+mkinitrd -c -k 6.12.68-ms -f ext4 -r /dev/sda3 -m usb-storage:xhci-hcd:xhci-pci:ohci-pci:ehci-pci:uhci-hcd:ehci-hcd:hid:usbhid:i2c-hid:hid_generic:hid-asus:hid-cherry:hid-logitech:hid-logitech-dj:hid-logitech-hidpp:hid-lenovo:hid-microsoft:hid_multitouch:ext4 -u -o /boot/initrd.gz
+
+21.
+grub-mkconfig -o /boot/grub/grub.cfg
+
+reboot
+
+22.
+mkinitrd -c -k 6.12.68-ms -f ext4 -r /dev/sda3 -m ext4
+
+23.
+grub-mkconfig -o /boot/grub/grub.cfg
+
+reboot
+  
