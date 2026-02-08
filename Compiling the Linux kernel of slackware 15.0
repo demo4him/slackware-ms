@@ -26,7 +26,7 @@ make -j6 # 6 in my case
 7.
 make modules_install
 
-8.
+8. # remove all '-ms' in your case
 cp arch/x86/boot/bzImage /boot/vmlinuz-ms-6.12.68
 
 9.
