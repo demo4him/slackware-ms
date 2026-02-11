@@ -1,0 +1,40 @@
+cd /tmp
+echo "###################################################"
+echo "[01/3] Installing GNOME3 Desktop Database..."
+echo "{ lftp -c 'slackware.uk' }"
+echo "###################################################"
+sleep 3
+lftp -c "open https://slackware.uk/people/r0ni/x86_64/slackware64-15.0/; mirror gcs38"
+cd /tmp
+echo
+echo
+echo
+echo "###################################################"
+echo "[02/3] Installing GNOME3 Packages..."
+echo "{ installpkg */*.t?z  }"
+echo "###################################################"
+sleep 3
+cd gcs38/
+echo
+installpkg *.t?z
+echo
+echo "###################################################"
+echo "[03/3] Remove mirror GNOME3 Desktop"
+echo "###################################################"
+sleep 3
+cd /tmp
+rm -rf gcs38
+echo
+echo
+echo
+echo "#########################################"
+echo "##                                     ##"
+echo "##    INSTALLING-PROCESS IS FINSIHED    ##"
+echo "##                                     ##"
+echo "#########################################"
+sleep 6
+exit
+sleep 6
+exit
+
+
