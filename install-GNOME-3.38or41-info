@@ -1,0 +1,3 @@
+# As ROOT
+groupadd -g 303 colord
+useradd -d /var/lib/colord -u 303 -g colord -s /bin/false colord
