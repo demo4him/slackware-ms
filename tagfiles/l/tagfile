@@ -283,7 +283,7 @@ pcre2:ADD
 phonon:SKP
 phonon-backend-gstreamer:SKP
 pilot-link:ADD
-pipewire:SKP
+pipewire:ADD
 polkit:ADD
 polkit-gnome:ADD
 polkit-qt-1:SKP
