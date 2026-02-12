@@ -6,4 +6,4 @@ For Nvidia Video Card download Nvidia-Driver script. You can modify script to ch
 
 
 
-To be appreciated: Repositories are from https://slackware.uk, except ponce’s one(http://ponce.cc/slackware/slackware64-15.0/lxde/). Scripts are also based on lftp command and pkgtool. All credits to them and slackware’s and linux world! Thanks for sharing!
+To be appreciated: Repositories are from https://slackware.uk, except ponce’s one (http://ponce.cc/slackware/slackware64-15.0/lxde/). Scripts are also based on lftp command and pkgtool. All credits to them and slackware’s and linux world! Thanks for sharing!
