@@ -20,8 +20,8 @@ make localmodconfig
 5. # I add -ms just in my case on config window/general items and on multimedia I checked [M]
 make menuconfig
 
-6. # numbers of cores
-make -j6 # 6 in my case
+6. # numbers of cores + 1
+make -j7 # 6 + 1 in my case
 
 7.
 make modules_install
