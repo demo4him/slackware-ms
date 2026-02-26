@@ -175,7 +175,7 @@ twm:SKP
 urw-core35-fonts-otf:ADD
 util-macros:ADD
 viewres:ADD
-vulkan-sdk:SKP
+vulkan-sdk:ADD
 wayland:ADD
 wayland-protocols:ADD
 wqy-zenhei-font-ttf:SKP
