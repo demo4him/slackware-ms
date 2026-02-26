@@ -22,7 +22,7 @@ apr:ADD
 apr-util:ADD
 argon2:ADD
 aspell:SKP
-aspell-en:SKP
+aspell-en:ADD
 at-spi2-atk:ADD
 at-spi2-core:ADD
 atk:ADD
