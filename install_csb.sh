@@ -9,7 +9,7 @@
 #  EMAIL : iuricostafreire at gmail dot com
 #  GITHUB: github.com/ifreire
 #  DATE  : 2020-05-22
-#  Modify by demo4him
+#  Modify for CINNAMON DE by demo4him
 #  date: 2026-03-16
 #  source: https://slackware.uk/
 
