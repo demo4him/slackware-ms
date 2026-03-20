@@ -1,5 +1,5 @@
-#Install for slackware 15: flatpak REQUIRES: xdg-desktop-portal-gtk, gcab, appstream-glib, bubblewrap, ostree (sbopkg+sbotools or sbozyp or slakstore)
-# ass root
+#Install for slackware 15: flatpak REQUIRES: xdg-desktop-portal-gtk, gcab, appstream-glib, bubblewrap, ostree (sbopkg+sbotools or sbozyp or slkstore)
+# as root
 sudo groupadd -r flatpak
 sudo useradd -r -g flatpak -d / -s /sbin/nologin -c "User for flatpak system helper" flatpak
 
