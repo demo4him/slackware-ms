@@ -1,0 +1,43 @@
+#Install for slackware 15: flatpak REQUIRES: xdg-desktop-portal-gtk, gcab, appstream-glib, bubblewrap, ostree (sbopkg+sbotools or sbozyp or slkstore)
+# as root
+sudo groupadd -r flatpak
+sudo useradd -r -g flatpak -d / -s /sbin/nologin -c "User for flatpak system helper" flatpak
+
+1.
+sudo ls -ld /var/lib/flatpak/repo
+2.
+cd /var/lib/flatpak
+3.
+sudo mkdir -p repo/objects repo/tmp
+4. # all as one command
+sudo tee repo/config <<EOF
+[core]
+repo_version=1
+mode=bare-user-only
+min-free-space-size=500MB
+EOF
+5.
+sudo chown -R $USER:users /var/lib/flatpak/repo
+6.
+#flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo# optional
+#sudo flatpak remote-delete flathub --system
+7.
+flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 
+8.
+sudo ls -ld /var/lib/flatpak/repo
+9.
+flatpak remotes -d
+10.
+flatpak remote-ls | less
+11.
+flatpak list
+12.
+flatpak uninstall --unused/flatpak remove --all/flatpak remove application
+*********************************************
+TEST   #options system or user (non root)
+sudo flatpak install zoom in system mode
+flatpak install zoom in user mode
+sudo flatpak install brave in system mode
+flatpak install brave in user mode
+
+ALL DONE!
