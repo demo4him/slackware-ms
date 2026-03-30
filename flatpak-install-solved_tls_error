@@ -33,7 +33,7 @@ flatpak remote-ls | less
 flatpak list
 12.
 flatpak uninstall --unused/flatpak remove --all/flatpak remove application
-13.
+13. Only for steam with pulse-audio server
 export `xprop -root -notype PULSE_SERVER | tr -d ' '`
 *********************************************
 TEST   #options system or user (non root)
