@@ -7,4 +7,4 @@ sudo mount /dev/sdb1 /home
 sudo umount /home
 sudo rm -rf /home/*
 echo "/dev/sdb1        /home            ext4        defaults         1   2" >> /etc/fstab
-echo "Reboot Slackware"
+echo "Reboot Slackware!"
