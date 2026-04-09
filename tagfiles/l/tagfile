@@ -44,7 +44,7 @@ dbus-python:ADD
 dconf:ADD
 dconf-editor:SKP
 desktop-file-utils:ADD
-djvulibre:SKP
+djvulibre:ADD
 dotconf:ADD
 dvdauthor:ADD
 ebook-tools:SKP
