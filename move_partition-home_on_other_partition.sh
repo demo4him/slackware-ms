@@ -1,5 +1,29 @@
 #!/bin/sh
-
+##HOW TO MOVE PARTITION HOME ON OTHER DISK PARTTION 
+##1.Ctrl+Alt+F1.
+##2.lsblk to identify your partition
+##3.sudo or su 
+##sudo mkdir /mnt/tmp
+##sudo mount /dev/sd?1 /mnt/tmp
+##sudo rsync -avx /home/ /mnt/tmp
+##sudo mount /dev/sd?1 /home
+###unmount the new home first!
+##sudo umount /home  
+###deletes the old home
+##sudo rm -rf /home/*  
+##4.Make HOME permanent
+##We need to know the UUID of the new partition for the fstab entry seen from:
+##sudo blkid
+##Note or copy/paste the correct UUID to edit your fstab with
+###or any other editor
+##sudo nano /etc/fstab   
+##For example, add the second line at the end of the last line of fstab file or underneath to new disk/space partition of /home:
+##UUID=439c3001-eaf6-4fec-acce-84da692361c0    /DATA    ext4    defaults   0  2
+##UUID=439c3001-eaf6-4fec-acce-84da692361c0    /home    ext4    defaults   0  2
+##*DATA or other name you chosen of partition for the other disk
+##Take care to choose the appropriate filesystem here, e.g. ext3/4 if ext3/4 formatted
+##5. Reboot
+## This script is adapted to my system!
 #sudo mkdir /mnt/tmp
 sudo mount /dev/sdb1 /mnt/tmp
 sudo rsync -avx /home/ /mnt/tmp
