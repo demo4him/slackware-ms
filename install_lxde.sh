@@ -25,5 +25,5 @@ cd lxde
 
 upgradepkg --reinstall --install-new *.t?z
 
-#rm -rf ~/.lxdepkgs
+rm -rf ~/.lxdepkgs
 echo ALL DONE!
