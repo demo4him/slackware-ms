@@ -26,5 +26,5 @@ mv ~/.xfce4pkgs/xfce4.20-15.0/salix/x/* ~/.xfce4pkgs/xfce4.20-15.0/
 mv ~/.xfce4pkgs/xfce4.20-15.0/salix/xfce/* ~/.xfce4pkgs/xfce4.20-15.0/
 cd ~/.xfce4pkgs/xfce4.20-15.0/
 upgradepkg --reinstall --install-new *.t?z
-#rm -rf ~/.xfce4pkgs
+rm -rf ~/.xfce4pkgs
 echo ALL DONE!
