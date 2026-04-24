@@ -11,7 +11,7 @@
 #  DATE  : 2020-05-22
 #  Modify by demo4him
 #  date: 2026-03-16
-#  source: https://slackware.uk/
+#  source: https://slackware.uk/csb-current
 
 SLACKVER=15-current
 ARCH=$(uname -m)
