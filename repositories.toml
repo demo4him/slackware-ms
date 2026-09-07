@@ -1,0 +1,229 @@
+# General repositories configuration file for slpkg.
+# Location: /etc/slpkg/repositories.toml
+# Last Updated: 21/05/2026
+# Version: 6.1.6
+
+# Enable or disable repositories by setting 'true' or 'false'.
+# You can also use custom mirrors not included in this file.
+
+# Notes:
+# - Before using a repository, ensure you understand its purpose.
+# - Some repositories are designed for Slackware -current only.
+# - Ensure the mirror URL ends with a slash '/'
+#   (except for Git repositories).
+# - The name 'all' is reserved by slpkg (-o all means "all repositories").
+#   Do not use [ALL] as a custom repository section name.
+
+# Template for defining a custom binary repository:
+# Required options: [NAME], ENABLE, MIRROR, and TAG.
+# The MIRROR must include the following files:
+# - ChangeLog.txt
+# - PACKAGES.TXT
+# - CHECKSUMS.md5
+# If the ChangeLog.txt is located in a different branch,
+# specify it using the CHANGELOG variable.
+# Example:
+# [ALIEN]
+# ENABLE = true
+# MIRROR = "https://slackware.nl/people/alien/sbrepos/15.0/x86_64/"
+# CHANGELOG = "https://slackware.nl/people/alien/sbrepos/"
+# TAG = "alien"
+
+# ALL-REPOS mode — participation in 'slpkg upgrade -o all' and 'slpkg install <pkg> -o all':
+# Add repository names to the PRIORITY list in [ALL_REPOS] below.
+# The order in the list determines the processing sequence (first = processed first).
+# Example: PRIORITY = ["ponce", "alien"]
+
+# Local repository support:
+# Binary repositories support local filesystem mirrors.
+# Use an absolute path or a file:// URI as the MIRROR value.
+# The local directory must contain PACKAGES.TXT, CHECKSUMS.md5,
+# and ChangeLog.txt. Example:
+# [MYREPO]
+# ENABLE = true
+# MIRROR = "/mnt/local-repo/packages/"
+# TAG = "local"
+#
+# SlackBuild repositories (SBO/PONCE) also support local mirrors:
+# - Git mirror:       MIRROR = "/path/to/local/slackbuilds.git"
+# - Directory mirror: MIRROR = "/path/to/local/slackbuilds/"
+#   (directory must contain a valid SLACKBUILDS.TXT or the SlackBuild
+#    directory tree from which slpkg can generate one)
+
+# Salix OS Distribution:
+# Replace the SLACK, SLACK_EXTRA, and SLACK_PATCHES mirrors with:
+# https://repo.greeklug.gr/data/pub/linux/salix/x86_64/slackware-15.0/
+# https://repo.greeklug.gr/data/pub/linux/salix/x86_64/slackware-15.0/extra/
+# https://repo.greeklug.gr/data/pub/linux/salix/x86_64/slackware-15.0/patches/
+
+[DEFAULT]
+# Default repository used by slpkg.
+# Change this to one of the repositories listed below.
+# Ensure the desired repository is enabled before switching.
+REPOSITORY = "slack"
+
+[NEW_PACKAGES]
+# Specify repositories to check for new packages during upgrades.
+# Only applicable for repositories fully installed on the system.
+# Example: ["slack", "gnome"]
+# Note: Always review new packages before installation.
+# Recommended ["slack"] repository for Slackware -current users,
+# it is equivalent to 'slackpkg install-new'.
+REPOSITORIES = []
+
+[REMOVE_PACKAGES]
+# Specify repositories to remove installed packages that no longer
+# exist in the repository. Only applicable for repositories fully
+# installed on the system.
+# Example: ["slack", "gnome"]
+# WARNING: Always review the list of packages to be removed before
+# proceeding.
+REPOSITORIES = []
+
+[SBOSRCARCH]
+# Archive of source files linked to by .info files on SlackBuilds.org.
+# Used as an alternative download source for SBo and Ponce repositories.
+# For more information, visit: https://slackware.uk/sbosrcarch/README
+MIRROR = "https://slackware.uk/sbosrcarch/by-name/"
+
+[ALL_REPOS]
+# Repositories to include when using '-o all' (or '-o "*"') with 'upgrade' or 'install',
+# listed in processing order (case-insensitive). The first name is processed first.
+# If empty (the default), all enabled repositories are used in repositories.toml order.
+# Example: PRIORITY = ["ponce", "alien"]
+PRIORITY = []
+
+#--------------------------------------------------------------------
+# Repositories for Slackware 15.0 and Slackware -current 15.0+
+#--------------------------------------------------------------------
+
+[SBO]
+# SlackBuilds.org — the main community repository of build scripts for Slackware.
+ENABLE = false
+MIRROR = "https://slackbuilds.org/slackbuilds/15.0/"
+# Alternative, you can use a git repository.
+# MIRROR = "https://github.com/SlackBuildsOrg/slackbuilds.git"
+# MIRROR = "https://gitlab.com/SlackBuilds.org/slackbuilds.git"
+# By default, the 'master' branch is used. You can change this to another branch,
+# for example '15.0', if you need to.
+# BRANCH = "master"
+
+[PONCE]
+# Ponce's SlackBuilds repository, maintained for Slackware -current.
+# Only enable if you are running Current.
+ENABLE = true
+MIRROR = "https://github.com/Ponce/slackbuilds.git"
+# By default, the 'master' branch is used. You can change this to another branch,
+# if you need to.
+BRANCH = 'current'
+# Alternative, you can use this repository.
+# MIRROR = "https://cgit.ponce.cc/slackbuilds/plain/"
+
+[SLACK]
+# Official Slackware Linux base packages.
+ENABLE = true
+MIRROR = "https://slackware.uk/slackware/slackware64-current/"
+
+[SLACK_EXTRA]
+# Official Slackware extra packages (not part of the base system).
+ENABLE = true
+MIRROR = "https://slackware.uk/slackware/slackware64-current/extra/"
+
+[SLACK_PATCHES]
+# Official Slackware security and bug-fix patches.
+ENABLE = false
+MIRROR = "https://mirror.nl.leaseweb.net/slackware/slackware64-15.0/patches/"
+
+[SLACK_TESTING]
+# Slackware -current testing packages.
+# Only enable if you are running Current.
+ENABLE = false
+MIRROR = "https://mirror.nl.leaseweb.net/slackware/slackware64-current/testing/"
+
+[ALIEN]
+# Eric Hameleers' (AlienBob) repository of pre-built binary packages for Slackware.
+ENABLE = true
+MIRROR = "https://slackware.nl/people/alien/sbrepos/current/x86_64/"
+
+[MULTILIB]
+# Eric Hameleers' multilib repository.
+# Enables 32-bit application support on 64-bit Slackware.
+ENABLE = true
+MIRROR = "https://slackware.nl/people/alien/multilib/current/"
+
+[RESTRICTED]
+# Eric Hameleers' restricted repository.
+# Contains packages with licensing restrictions that prevent free redistribution.
+ENABLE = true
+MIRROR = "https://slackware.nl/people/alien/restricted_sbrepos/current/x86_64/"
+
+[GNOME]
+# GNOME For Slackware (GFS) — GNOME desktop environment packages.
+ENABLE = false
+MIRROR = "https://slackware.uk/gfs/15.0/41.10/x86_64/"
+
+[COSMIC]
+# COSMIC Desktop Environment packages for Slackware.
+# This repository is based on Slackware Current.
+# Only enable if you are running Current.
+ENABLE = false
+MIRROR = "https://slackware.uk/cosmicde/x86_64/"
+
+[MSB]
+# Matt's SlackBuilds — KDE Plasma desktop environment packages for Slackware.
+ENABLE = false
+MIRROR = "https://slackware.uk/msb/15.0/1.28/x86_64/"
+
+[CSB]
+# Community SlackBuilds — a collection of additional binary packages for Slackware.
+ENABLE = false
+MIRROR = "https://slackware.uk/csb/15.0/x86_64/"
+
+[CONRAID]
+# Conraid's repository (slackers.it) — binary packages for Slackware.
+# This repository is based on Slackware Current.
+# Only enable if you are running Current.
+ENABLE = true
+MIRROR = "https://slackers.it/repository/slackware64-current/"
+
+[SLACKONLY]
+# SlackOnly — pre-built binary packages for Slackware 15.0.
+ENABLE = false
+MIRROR = "https://packages.slackonly.com/pub/packages/15.0-x86_64/"
+
+[SALIX]
+# Salix OS base packages. Salix is a Slackware-based Linux distribution.
+ENABLE = false
+MIRROR = "https://repo.greeklug.gr/data/pub/linux/salix/x86_64/15.0/"
+
+[SALIX_EXTRA]
+# Salix OS extra packages.
+ENABLE = false
+MIRROR = "https://repo.greeklug.gr/data/pub/linux/salix/x86_64/extra-15.0/"
+
+[SLACKEL]
+# Slackel OS repository. Slackel is a Slackware and Salix-based Linux distribution.
+# This repository is based on Slackware Current.
+# Only enable if you are running Current.
+ENABLE = true
+MIRROR = "https://slackware.uk/slackel/x86_64/current/"
+
+[SLINT]
+# Slint Linux — a multilingual, accessibility-friendly Slackware-based distribution.
+ENABLE = false
+MIRROR = "https://slackware.uk/slint/x86_64/slint-15.0/"
+
+[PPRKUT]
+# pprkut's personal repository of binary packages for Slackware.
+ENABLE = false
+MIRROR = "https://repo.liwjatan.org/pprkut/15.0/x86_64/"
+
+[SLACKDCE]
+# SlackDCE — packages for the DCE (Desktop Computing Environment) project based on Slackware.
+ENABLE = false
+MIRROR = "https://slackware.halpanet.org/slackdce/packages/15.0/x86_64/"
+
+[D2SLACK]
+# D2Slack — additional SlackDCE packages.
+ENABLE = false
+MIRROR = "https://slackdce.theworkpc.com/mirrors/d2slack/"

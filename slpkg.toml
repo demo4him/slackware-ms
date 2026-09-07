@@ -1,0 +1,277 @@
+# General configuration file for slpkg.
+# Location: /etc/slpkg/slpkg.toml
+# Last Updated: 21/05/2026
+# Version: 6.1.6
+
+[logging]
+
+# Sets the minimum severity level for log messages written by the application.
+# Messages with a lower severity than the configured level will be ignored.
+#
+# Available options (from least to most verbose):
+#   "CRITICAL" - For severe errors that cause the application to stop.
+#   "ERROR"    - For serious problems that prevent a function from completing.
+#   "WARNING"  - For unexpected events or potential issues that don't stop execution.
+#   "INFO"     - For general confirmation that things are working as expected (default).
+#   "DEBUG"    - For detailed diagnostic information, useful for troubleshooting.
+#
+# Default: "INFO"
+LOGGING_LEVEL = "INFO"
+
+[ui]
+
+# Enable or disable colorful menu display.
+# Default is true. [true/false]
+COLORS = true
+
+# Specifies the terminal pager command to use when viewing paginated output.
+# This command should accept content via standard input (stdin).
+# Common pagers include "less -R" (recommended for color support), "more", or "most".
+# The "-R" option for 'less' allows ANSI color escape sequences to be interpreted.
+# Set to "" to disable. Default is "most".
+PAGER = "most"
+
+# Specifies the default text editor to use for opening and editing files.
+# This variable is typically read from the environment (e.g., EDITOR=$EDITOR)
+# but can be explicitly set here. Common editors include "vim", "nano", "emacs".
+# Default is "vim".
+EDITOR = "vim"
+
+# Enable or disable the use of dialog for interactive shell
+# scripts. Dialog allows you to display questions or messages
+# using dialog boxes. Default is false. [true/false]
+DIALOG = false
+
+# Enable or disable the terminal selector for interactive shell
+# scripts. Allows you to display a checkbox to choose packages.
+# Default is true. [true/false]
+TERMINAL_SELECTOR = true
+
+# Enable quiet mode permanently. When true, build/process output is
+# suppressed and a progress bar is shown instead (same effect as the
+# '--quiet' command-line flag). Default is true. [true/false]
+QUIET = true
+
+# Choose a spinner style for the progress bar. Options include:
+# [spinner/pie/moon/line/pixel/ball/clock]. Default is 'spinner'.
+PROGRESS_SPINNER = "spinner"
+
+# Choose a color for the progress bar spinner. Default is white.
+# Options: [white/green/yellow/cyan/grey/red]
+SPINNER_COLOR = "white"
+
+[packages]
+
+# List of file suffixes for binary packages.
+# These are the supported package formats for installation.
+# Default is [".txz", ".tgz", ".tlz", ".tbz"].
+PACKAGE_TYPE = [".txz", ".tgz", ".tlz", ".tbz"]
+
+# Specifies the file suffix for package list files.
+# Change this value if you intend to use '.sqf' files instead.
+# Default is ".pkgs".
+FILE_LIST_SUFFIX = ".pkgs"
+
+# There are two different methods to choose from when upgrading
+# your installed packages: the "version" method and the
+# "package" method.
+#
+# - The "version" method (PACKAGE_METHOD = false): Compares the version
+#   and build number of the packages, following semantic versioning rules.
+#   Recommended for -current users.
+#   WARNING: Packages that do not follow semantic versioning rules are ignored.
+#
+# - The "package" method (PACKAGE_METHOD = true, default): Checks for
+#   differences between the installed and repository package names, which
+#   means it may also suggest downgrades if the installed package is newer
+#   than the one in the repository.
+#
+# Default is true. [true/false]
+PACKAGE_METHOD = true
+
+# Enable or disable the ability to downgrade packages.
+# This setting only works when PACKAGE_METHOD = false (version method).
+# Default is false. [true/false]
+DOWNGRADE_PACKAGES = false
+
+# View missing dependencies as main packages from
+# the repository. Some repositories include packages only
+# as dependencies, but not as standalone main packages.
+# Default is false. [true/false]
+VIEW_MISSING_DEPS = true
+
+# Remove the kernel version from custom SlackBuilds
+# (e.g., nvidia-kernel, virtualbox-kernel) to simplify version
+# comparison between installed and repository packages.
+# This is ignored if PACKAGE_METHOD is true.
+# Default is true. [true/false]
+KERNEL_VERSION = true
+
+# Specify a command to run after a kernel upgrade to update
+# the bootloader.
+# Example for GRUB: grub-mkconfig -o /boot/grub/grub.cfg.
+# Default is "".
+BOOTLOADER_COMMAND = ""
+
+[build]
+
+# Specify the number of concurrent jobs to run during builds.
+# Default is '-j4'.
+MAKEFLAGS = "-j4"
+
+# Delete downloaded source files after building or
+# installing packages. Default is false. [true/false]
+DELETE_SOURCES = false
+
+[verification]
+
+# Enable or disable GPG verification for package integrity.
+# If set to true, ensure repositories are updated to import GPG keys.
+# Support for Git mirrors is unavailable, as .asc files are missing.
+# Default is false. [true/false]
+GPG_VERIFICATION = false
+
+# Enable or disable MD5 checksum verification.
+# Default is true. [true/false].
+CHECKSUM_MD5 = true
+
+# Virtual filesystem path prefixes to skip during 'slpkg verify'.
+# Files under these paths are never present on a real filesystem and
+# are always excluded from the missing-file check.
+# Default is ["dev/", "proc/", "sys/", "run/"].
+VERIFY_SKIP_VIRTUAL = ["dev/", "proc/", "sys/", "run/"]
+
+# Path prefixes to skip during 'slpkg verify'.
+# Files whose path starts with any of these prefixes will not be reported
+# as missing. Add runtime-populated paths such as virus databases or caches.
+# Paths must be relative (no leading '/'), matching the FILE LIST format.
+# Example: VERIFY_SKIP_PREFIXES = ["install/", "var/lib/clamav/"]
+# Default is ["install/"].
+VERIFY_SKIP_PREFIXES = ["install/"]
+
+# File suffixes to skip during 'slpkg verify'.
+# Files whose name ends with any of these suffixes will not be reported
+# as missing. Useful for config placeholders or runtime-generated files.
+# Example: VERIFY_SKIP_SUFFIXES = [".new", ".sample", ".db"]
+# Default is [".new", ".sample"].
+VERIFY_SKIP_SUFFIXES = [".new", ".sample"]
+
+[download]
+
+# Choose a downloader tool. Options: [wget/wget2/curl/aria2c/lftp].
+# Default is 'wget'.
+DOWNLOADER = "wget"
+
+# Specifies the download location for packages.
+# Note: This path is only used with the 'download' command.
+# Default is /tmp/slpkg.
+DOWNLOAD_ONLY_PATH = "/tmp/slpkg/"
+
+# Enable or disable parallel downloading of sources.
+# Default is false. [true/false]
+# Alternatively, use the '--parallel' command-line option.
+PARALLEL_DOWNLOADS = false
+
+# Specify the maximum number of concurrent download streams.
+# Default is 5.
+MAXIMUM_PARALLEL = 5
+
+# Specify options for the Wget downloader:
+# -c, --continue: Resume partial downloads.
+# -q: Suppress Wget's output.
+# --show-progress: Force display of the progress bar.
+# Default is "-c -q --progress=bar:force:noscroll --show-progress".
+WGET_OPTIONS = "-c -q --progress=bar:force:noscroll --show-progress"
+
+# Specify options for the Curl downloader.
+# Default is "".
+CURL_OPTIONS = ""
+
+# Specify options for the aria2c downloader.
+# -c, --continue: Resume download started by web browsers or other programs.
+# Default is "-c".
+ARIA2_OPTIONS = "-c"
+
+# Specify options for the LFTP 'get' command. Default is '-c get -e'.
+LFTP_GET_OPTIONS = "-c get -e"
+
+# Specify options for the LFTP 'mirror' command, used for synchronizing
+# SBo and Ponce repositories or local repositories. Default is:
+# '-c mirror --parallel=100 --only-newer --delete'.
+LFTP_MIRROR_OPTIONS = "-c mirror --parallel=100 --only-newer --delete"
+
+# Use Git instead of LFTP to synchronize SlackBuilds repositories
+# (SBo and Ponce). Requires updating the 'mirror' setting
+# in repositories.toml. Default is "git clone --depth 1".
+GIT_CLONE = "git clone --depth 1"
+
+[commands]
+
+# Specify the Slackware command for installing packages. By default,
+# 'upgradepkg' is used with the '--install-new' option to install new
+# packages alongside upgrades. See the 'upgradepkg' manpage for details.
+# Default is "upgradepkg --install-new".
+INSTALLPKG = "upgradepkg --install-new"
+
+# Specify the Slackware command used by 'slpkg install-pkg' to install
+# local package files directly. By default, 'installpkg' is used.
+# Change to "upgradepkg --install-new" if you prefer upgradepkg behaviour.
+# Default is "installpkg".
+LOCAL_INSTALLPKG = "installpkg"
+
+# Specify the Slackware command for reinstalling packages. By default,
+# 'upgradepkg' is used with the '--reinstall' option to force
+# re-installation even if the same version is already installed.
+# Default is "upgradepkg --reinstall".
+REINSTALL = "upgradepkg --reinstall"
+
+# Specify the Slackware command for removing packages. By default,
+# 'removepkg' is used. See the 'removepkg' manpage for details.
+# Default is "removepkg".
+REMOVEPKG = "removepkg"
+
+[behavior]
+
+# Enable or disable interactive questions. If set to false,
+# the --yes option will not work. Default is true. [true/false]
+ASK_QUESTION = true
+
+# Confirmation behaviour when using '-o all' (or '-o "*"') with 'upgrade' or 'install'.
+# "once"     - Ask for confirmation once for all repositories (default).
+# "per_repo" - Ask for confirmation before processing each repository individually.
+ALL_REPOS_CONFIRM = "once"
+
+# Keep process log files in the /var/log/slpkg/ directory.
+# Default is true. [true/false]
+PROCESS_LOG = true
+
+# Warn during 'slpkg update' if a repository mirror URL does not match
+# the installed Slackware version (stable vs. current).
+# The check is skipped when the mirror URL contains no recognisable
+# version hint ('current' or a version number like '15.0').
+# Default is true. [true/false]
+MIRROR_VERSION_CHECK = true
+
+[network]
+
+# Configure Python urllib3 settings for changelog file comparisons.
+# Timeouts control how long requests are allowed to run before being
+# aborted. By default, urllib3 retries requests 3 times and follows
+# up to 3 redirects. For more details, visit:
+# https://urllib3.readthedocs.io/en/stable/user-guide.html
+# Default are: URLLIB_RETRIES = false, URLLIB_REDIRECT = false,
+# URLLIB_TIMEOUT = 3.0.
+URLLIB_RETRIES = false
+URLLIB_REDIRECT = false
+URLLIB_TIMEOUT = 3.0
+
+[proxy]
+
+# Configure proxy server settings. Choose between 'http' or 'socks'
+# proxy types. For SOCKS proxies, install the PySocks package.
+# For more details, visit:
+# https://urllib3.readthedocs.io/en/stable/advanced-usage.html#socks-proxies
+# Default are: PROXY_ADDRESS = "", PROXY_USERNAME = "", PROXY_PASSWORD = "".
+PROXY_ADDRESS = ""
+PROXY_USERNAME = ""
+PROXY_PASSWORD = ""
