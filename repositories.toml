@@ -60,7 +60,7 @@
 # Default repository used by slpkg.
 # Change this to one of the repositories listed below.
 # Ensure the desired repository is enabled before switching.
-REPOSITORY = "slack"
+REPOSITORY = "sbo"
 
 [NEW_PACKAGES]
 # Specify repositories to check for new packages during upgrades.
@@ -99,11 +99,11 @@ PRIORITY = []
 
 [SBO]
 # SlackBuilds.org — the main community repository of build scripts for Slackware.
-ENABLE = false
-MIRROR = "https://slackbuilds.org/slackbuilds/15.0/"
+ENABLE = true
+# MIRROR = "https://slackbuilds.org/slackbuilds/15.0/"
 # Alternative, you can use a git repository.
 # MIRROR = "https://github.com/SlackBuildsOrg/slackbuilds.git"
-# MIRROR = "https://gitlab.com/SlackBuilds.org/slackbuilds.git"
+MIRROR = "https://gitlab.com/SlackBuilds.org/slackbuilds.git"
 # By default, the 'master' branch is used. You can change this to another branch,
 # for example '15.0', if you need to.
 # BRANCH = "master"
@@ -111,7 +111,7 @@ MIRROR = "https://slackbuilds.org/slackbuilds/15.0/"
 [PONCE]
 # Ponce's SlackBuilds repository, maintained for Slackware -current.
 # Only enable if you are running Current.
-ENABLE = true
+ENABLE = false
 MIRROR = "https://github.com/Ponce/slackbuilds.git"
 # By default, the 'master' branch is used. You can change this to another branch,
 # if you need to.
@@ -122,12 +122,12 @@ BRANCH = 'current'
 [SLACK]
 # Official Slackware Linux base packages.
 ENABLE = true
-MIRROR = "https://slackware.uk/slackware/slackware64-current/"
+MIRROR = "https://slackware.uk/slackware/slackware64-15.0/"
 
 [SLACK_EXTRA]
 # Official Slackware extra packages (not part of the base system).
 ENABLE = true
-MIRROR = "https://slackware.uk/slackware/slackware64-current/extra/"
+MIRROR = "https://slackware.uk/slackware/slackware64-15.0/extra/"
 
 [SLACK_PATCHES]
 # Official Slackware security and bug-fix patches.
@@ -143,19 +143,19 @@ MIRROR = "https://mirror.nl.leaseweb.net/slackware/slackware64-current/testing/"
 [ALIEN]
 # Eric Hameleers' (AlienBob) repository of pre-built binary packages for Slackware.
 ENABLE = true
-MIRROR = "https://slackware.nl/people/alien/sbrepos/current/x86_64/"
+MIRROR = "https://slackware.nl/people/alien/sbrepos/15.0/x86_64/"
 
 [MULTILIB]
 # Eric Hameleers' multilib repository.
 # Enables 32-bit application support on 64-bit Slackware.
-ENABLE = true
-MIRROR = "https://slackware.nl/people/alien/multilib/current/"
+ENABLE = false
+MIRROR = "https://slackware.nl/people/alien/multilib/15.0/"
 
 [RESTRICTED]
 # Eric Hameleers' restricted repository.
 # Contains packages with licensing restrictions that prevent free redistribution.
 ENABLE = true
-MIRROR = "https://slackware.nl/people/alien/restricted_sbrepos/current/x86_64/"
+MIRROR = "https://slackware.nl/people/alien/restricted_sbrepos/15.0/x86_64/"
 
 [GNOME]
 # GNOME For Slackware (GFS) — GNOME desktop environment packages.
@@ -183,7 +183,7 @@ MIRROR = "https://slackware.uk/csb/15.0/x86_64/"
 # Conraid's repository (slackers.it) — binary packages for Slackware.
 # This repository is based on Slackware Current.
 # Only enable if you are running Current.
-ENABLE = true
+ENABLE = false
 MIRROR = "https://slackers.it/repository/slackware64-current/"
 
 [SLACKONLY]
@@ -193,20 +193,20 @@ MIRROR = "https://packages.slackonly.com/pub/packages/15.0-x86_64/"
 
 [SALIX]
 # Salix OS base packages. Salix is a Slackware-based Linux distribution.
-ENABLE = false
-MIRROR = "https://repo.greeklug.gr/data/pub/linux/salix/x86_64/15.0/"
+ENABLE = true
+MIRROR = "https://slackware.uk/salix/x86_64/15.0/"
 
 [SALIX_EXTRA]
 # Salix OS extra packages.
-ENABLE = false
-MIRROR = "https://repo.greeklug.gr/data/pub/linux/salix/x86_64/extra-15.0/"
+ENABLE = true
+MIRROR = "https://slackware.uk/salix/x86_64/extra-15.0/"
 
 [SLACKEL]
 # Slackel OS repository. Slackel is a Slackware and Salix-based Linux distribution.
 # This repository is based on Slackware Current.
 # Only enable if you are running Current.
-ENABLE = true
-MIRROR = "https://slackware.uk/slackel/x86_64/current/"
+ENABLE = false
+MIRROR = "http://www.slackel.gr/repo/x86_64/current/"
 
 [SLINT]
 # Slint Linux — a multilingual, accessibility-friendly Slackware-based distribution.
@@ -220,8 +220,8 @@ MIRROR = "https://repo.liwjatan.org/pprkut/15.0/x86_64/"
 
 [SLACKDCE]
 # SlackDCE — packages for the DCE (Desktop Computing Environment) project based on Slackware.
-ENABLE = false
-MIRROR = "https://slackware.halpanet.org/slackdce/packages/15.0/x86_64/"
+ENABLE = true
+MIRROR = "https://slackware.uk/slackdce/packages/15.0/x86_64/"
 
 [D2SLACK]
 # D2Slack — additional SlackDCE packages.
