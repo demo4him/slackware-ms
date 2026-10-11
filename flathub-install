@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Flathub Launcher for XFCE Whisker Menu (Slackware 15.0 style)
+# Independent of systemd, POSIX-compliant, KISS.
+
+# Define paths according to requirements
+LAUNCHER_DIR="$HOME/.local/share/applications"
+LAUNCHER_FILE="$LAUNCHER_DIR/flathub.desktop"
+ICON_PATH="/home/kituri/slackware/desktop/icons/flathub.png"
+
+# Ensure the destination directory exists (KISS: fail-safe)
+mkdir -p "$LAUNCHER_DIR"
+
+# Generate the .desktop file with English metadata
+cat << EOF > "$LAUNCHER_FILE"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Flathub AppStore for Linux
+Comment=Latest versions of all your favorite apps
+Exec=xdg-open https://flathub.org
+Icon=$ICON_PATH
+Terminal=false
+Categories=GTK;System;
+EOF
+
+# Apply execution permissions
+chmod +x "$LAUNCHER_FILE"
+
+echo "The launcher has been successfully created in:"
+echo "-> $LAUNCHER_FILE"
+echo "It should now appear in your Whisker Menu under the System section."

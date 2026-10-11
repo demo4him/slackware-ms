@@ -1,0 +1,184 @@
+
+##################################################################
+dconf write /org/mate/panel/objects/clock/prefs/format "'custom'"
+dconf write /org/mate/panel/objects/clock/prefs/custom-format "''"
+
+
+#value mac
+<sup><span font_desc="JetBrainsMono Nerd Font 18" weight="Bold" >%I:%M %p</span></sup>
+
+format: custom
+###########################################################
+git clone https://github.com/dunst-project/dunst.git
+cd dunst
+make
+sudo su
+make install
+##############################################################
+sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+#####################################
+mkdir ~/mc-onedark-theme && cd ~/mc-onedark-theme
+git clone https://github.com/DeadNews/mc-onedark.git
+mkdir -p ~/.local/share/mc/skins && cd ~/.local/share/mc/skins
+ln -s ~/mc-onedark-theme/mc-onedark/skins/onedark16M.ini
+#################################
+############################################
+#alacritty
+git clone https://github.com/alacritty/alacritty-theme ~/.config/alacritty/themes
+#copy file in .config
+###############################################
+curl -LO --output-dir ~/.config/alacritty https://github.com/catppuccin/alacritty/raw/main/catppuccin-mocha.toml
+###################################################
+general.import = [
+  # uncomment the flavour you want below:
+  # "~/.config/alacritty/catppuccin-latte.toml"
+  # "~/.config/alacritty/catppuccin-frappe.toml"
+  # "~/.config/alacritty/catppuccin-macchiato.toml"
+  "~/.config/alacritty/catppuccin-mocha.toml"
+]
+[env]
+TERM = "xterm-256color"
+####################################################
+
+##################################OPEN AS ROOT##############################
+
+create a newfile with the following
+
+#!/bin/sh
+# Super User Execute
+# Gives PkExec current environmental variables
+#  and passes current parameters thru running shells to it.
+#
+# Use this file instead of gksu, gksudo, and, pkexe.
+# /usr/bin/suxe
+
+pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY $1 $2 $3 $4 $5 $6
+................................................................
+save it as: ~/suxe (note: some distros DO NOT like the ~/ shorthand for home folder access. So, use your actual path in this situation) e.g /home/Johnny/Documents/suxe
+
+then make it an executable file in /usr/bin
+
+sudo cp ~/suxe /usr/bin/suxe
+
+make it executable
+
+cd /usr/bin
+su chmod -x ./suxe
+
+now in Thunars' custom action use:
+
+Name: 
+Open with admin access
+
+Command: 
+sudo -H suxe thunar %f
+
+File pattern: *
+
+Appears if selection contains: Directories
+############################
+#remove cache
+#root
+sysctl -w vm.drop_caches=3
+################################
+sudo nano /etc/X11/xorg.conf
+
+ServerLayout
+Option          "BlankTime"     "0"
+Option          "StandbyTime"   "0"
+Option          "SuspendTime"   "0"
+Option          "OffTime"       "0"
+
+
+and in the section "Monitor":
+
+Option          "DPMS"
+Option          "NODPMS"
+
+##################################
+wget -qO- https://git.io/papirus-icon-theme-install | sh
+##########################
+https://github.com/sbopkg/sbopkg/releases/tag/0.38.3/
+################################################################
+##################OPEN AS ROOT-PCMANFM######################### 
+1.
+mkdir -p .local/share/file-manager/actions
+
+2.
+nano .local/share/file-manager/actions/open\ folder\ as\ root.desktop
+
+3.
+Code: Select all
+
+[Desktop Entry]
+Type=Action
+Tooltip=Open Folder As Root
+Name=Open Folder As Root
+Icon=gtk-dialog-authentication
+Profiles=on_folder;
+
+[X-Action-Profile on_folder]
+Exec=gnsu pcmanfm %f
+MimeTypes=inode/directory;
+######################################################3
+$ id -u
+$ su
+1.
+
+nano /etc/group
+
+2.
+sudo:x:1000:marius
+#root
+3.
+nano /etc/sudoers
+## Uncomment to allow members of group sudo to execute any command
+
+
+# User privilege specification
+root    ALL=(ALL:ALL) ALL
+
+# Allow members of group sudo to execute any command
+%sudo   ALL=(ALL:ALL) ALL
+
+# Members of the admin group may gain root privileges
+%admin  ALL=(ALL) NOPASSWD:ALL
+
+# See sudoers(5) for more information on "#include" directives:
+
+#includedir /etc/sudoers.d
+marius  ALL=(ALL) NOPASSWD:ALL
+ 
+
+and for every user that needs sudo access WITH NO password:
+sudo groupadd admin
+groupadd admin
+sudo gpasswd -a marius admin
+
+
+4.
+nano /etc/profile
+
+# Set the default system $PATH:
+PATH=”/usr/local/bin:/usr/bin:/bin:/usr/games”
+
+# Set the default system $PATH:
+PATH=”/usr/local/bin:/usr/bin:/bin:/usr/games:/sbin:/usr/sbin
+
+5.
+restart
+************************************************************
+gnsu java -jar /opt/lxmed/LXMenuEditor.jar
+*************************************************************
+gsettings set org.gnome.desktop.wm.keybindings move-to-center "['<Control><Alt>J']"
+**************************************************************
+gnsu alacritty -e sboui
+********************************************
+6to2
+********************************************
+
+sudo nano /etc/pam.d/system-auth
+sudo passwd marius
+************************************************
+xcompmgr -c -C -t-5 -l-5 -r4.2 -o.55 &
+***********************************************

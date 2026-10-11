@@ -1,0 +1,609 @@
+#!/bin/sh
+#
+# install-cpu_temp
+# Slackware 15.0 Stable / POSIX sh / KISS
+#
+# Installs:
+#   /usr/local/bin/cpu-temp
+#   /usr/local/bin/cpu-temp-detector
+#   /etc/rc.d/rc.cpu-temp-detector
+#   /var/log/cpu-temp-detector.log
+#
+# Integrates the detector into rc.M without changing rc.d executable
+# bits or touching rc.inet1/rc.inet2.
+#
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin:/usr/local/sbin
+export PATH
+
+RCM=/etc/rc.d/rc.M
+RCS=/etc/rc.d/rc.cpu-temp-detector
+CPU_TEMP=/usr/local/bin/cpu-temp
+DETECTOR=/usr/local/bin/cpu-temp-detector
+LOG=/var/log/cpu-temp-detector.log
+BACKUP_DIR=/var/backups/install-cpu_temp
+HOOK='# Start CPU temperature detector.'
+HOOK2='if [ -x /etc/rc.d/rc.cpu-temp-detector ]; then'
+
+die()
+{
+    echo "ERROR: $*" >&2
+    exit 1
+}
+
+need_root()
+{
+    [ "`id -u`" -eq 0 ] || die "run this installer as root"
+}
+
+backup_file()
+{
+    file=$1
+    [ -f "$file" ] || return 0
+    mkdir -p "$BACKUP_DIR" || die "cannot create $BACKUP_DIR"
+    stamp=`date '+%Y%m%d-%H%M%S'`
+    base=${file##*/}
+    cp -p "$file" "$BACKUP_DIR/${base}.${stamp}.bak" ||
+        die "cannot back up $file"
+}
+
+write_cpu_temp()
+{
+cat > "$CPU_TEMP" <<'EOF_CPU_TEMP'
+#!/bin/sh
+
+find_tctl()
+{
+    for hwmon in /sys/class/hwmon/hwmon*; do
+        [ -r "$hwmon/name" ] || continue
+
+        name=`cat "$hwmon/name" 2>/dev/null`
+        [ "$name" = "k10temp" ] || continue
+
+        for input in "$hwmon"/temp*_input; do
+            [ -r "$input" ] || continue
+
+            label="${input%_input}_label"
+            [ -r "$label" ] || continue
+
+            sensor=`cat "$label" 2>/dev/null`
+
+            if [ "$sensor" = "Tctl" ]; then
+                echo "$input"
+                return 0
+            fi
+        done
+    done
+
+    return 1
+}
+
+TEMP_FILE=`find_tctl` || exit 1
+
+TEMP=`cat "$TEMP_FILE" 2>/dev/null`
+case "$TEMP" in
+    ''|*[!0-9]*) exit 1 ;;
+esac
+
+TEMP_C=`expr "$TEMP" / 1000`
+
+read_cpu()
+{
+    awk '/^cpu / {
+        print $2+$3+$4+$5+$6+$7+$8, $5
+        exit
+    }' /proc/stat
+}
+
+set -- `read_cpu`
+TOTAL1=$1
+IDLE1=$2
+
+sleep 1
+
+set -- `read_cpu`
+TOTAL2=$1
+IDLE2=$2
+
+DTOTAL=`expr "$TOTAL2" - "$TOTAL1"`
+DIDLE=`expr "$IDLE2" - "$IDLE1"`
+
+if [ "$DTOTAL" -gt 0 ]; then
+    LOAD=`expr \( "$DTOTAL" - "$DIDLE" \) \* 100 / "$DTOTAL"`
+else
+    LOAD=0
+fi
+
+if [ "$TEMP_C" -lt 60 ]; then
+    COLOR=green
+elif [ "$TEMP_C" -lt 80 ]; then
+    COLOR=orange
+else
+    COLOR=red
+fi
+
+echo "<txt><span foreground=\"$COLOR\">CPU ${TEMP_C}°C | ${LOAD}%</span></txt>"
+exit 0
+EOF_CPU_TEMP
+}
+
+write_detector()
+{
+cat > "$DETECTOR" <<'EOF_DETECTOR'
+#!/bin/sh
+
+RCDIR=/sys/class/hwmon
+
+find_tctl()
+{
+    for hwmon in /sys/class/hwmon/hwmon*; do
+        [ -r "$hwmon/name" ] || continue
+        [ "`cat "$hwmon/name" 2>/dev/null`" = "k10temp" ] || continue
+
+        for input in "$hwmon"/temp*_input; do
+            [ -r "$input" ] || continue
+
+            label="${input%_input}_label"
+            [ -r "$label" ] || continue
+
+            [ "`cat "$label" 2>/dev/null`" = "Tctl" ] || continue
+
+            echo "$input"
+            return 0
+        done
+    done
+
+    return 1
+}
+
+now()
+{
+    date '+%Y-%m-%d %H:%M:%S'
+}
+
+show_temp()
+{
+    WHOLE=`expr "$1" / 1000`
+    DEC=`expr "$1" % 1000 / 100`
+    echo "${WHOLE}.${DEC}"
+}
+
+TEMP_FILE=`find_tctl` || exit 1
+
+read_temp()
+{
+    temp=`cat "$TEMP_FILE" 2>/dev/null`
+
+    case "$temp" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+
+    echo "$temp"
+}
+
+read_cpu()
+{
+    awk '/^cpu / {
+        print $2+$3+$4+$5+$6+$7+$8, $5
+        exit
+    }' /proc/stat
+}
+
+LOG=/var/log/cpu-temp-detector.log
+
+# 5 samples, one sample every 2 seconds.
+COUNT=0
+T1=0
+T2=0
+T3=0
+T4=0
+T5=0
+
+EVENT_ID=0
+STATE=STABLE
+CLASSIFICATION=NORMAL
+
+EVENT_BASE=0
+EVENT_PEAK=0
+EVENT_AGE=0
+PERSIST=0
+
+LOAD_SUM=0
+LOAD_COUNT=0
+EVENT_MAX_LOAD=0
+
+RECOVERY_AGE=0
+RECOVERY_REVERSALS=0
+LAST_RECOVERY_TREND=FLAT
+PREV_RECOVERY_TREND=FLAT
+
+set -- `read_cpu`
+PREV_TOTAL=$1
+PREV_IDLE=$2
+
+trap 'exit 0' 0
+trap 'exit 0' 1 2 3 15
+
+while :; do
+    sleep 2
+
+    TEMP=`read_temp` || exit 1
+
+    set -- `read_cpu`
+    TOTAL=$1
+    IDLE=$2
+
+    DTOTAL=`expr "$TOTAL" - "$PREV_TOTAL"`
+    DIDLE=`expr "$IDLE" - "$PREV_IDLE"`
+
+    if [ "$DTOTAL" -gt 0 ]; then
+        LOAD=`expr \( "$DTOTAL" - "$DIDLE" \) \* 100 / "$DTOTAL"`
+    else
+        LOAD=0
+    fi
+
+    PREV_TOTAL=$TOTAL
+    PREV_IDLE=$IDLE
+
+    case "$COUNT" in
+        0)
+            T1=$TEMP
+            T2=$TEMP
+            T3=$TEMP
+            T4=$TEMP
+            T5=$TEMP
+            ;;
+        1)
+            T1=$T2
+            T2=$T3
+            T3=$T4
+            T4=$T5
+            T5=$TEMP
+            ;;
+        2)
+            T1=$T2
+            T2=$T3
+            T3=$T4
+            T4=$T5
+            T5=$TEMP
+            ;;
+        3)
+            T1=$T2
+            T2=$T3
+            T3=$T4
+            T4=$T5
+            T5=$TEMP
+            ;;
+        *)
+            T1=$T2
+            T2=$T3
+            T3=$T4
+            T4=$T5
+            T5=$TEMP
+            ;;
+    esac
+
+    if [ "$COUNT" -lt 5 ]; then
+        COUNT=`expr "$COUNT" + 1`
+    fi
+
+    START=$T1
+    END=$T5
+    DELTA=`expr "$END" - "$START"`
+
+    if [ "$DELTA" -gt 100 ]; then
+        TREND=UP
+    elif [ "$DELTA" -lt -100 ]; then
+        TREND=DOWN
+    else
+        TREND=FLAT
+    fi
+
+    [ "$COUNT" -ge 5 ] || continue
+
+    case "$STATE" in
+        STABLE|RECOVERED)
+            if [ "$DELTA" -gt 300 ]; then
+                EVENT_ID=`expr "$EVENT_ID" + 1`
+                STATE=RISING
+                CLASSIFICATION=UNRESOLVED
+                EVENT_BASE=$START
+                EVENT_PEAK=$T5
+                EVENT_AGE=2
+                PERSIST=1
+                LOAD_SUM=$LOAD
+                LOAD_COUNT=1
+                EVENT_MAX_LOAD=$LOAD
+                RECOVERY_AGE=0
+                RECOVERY_REVERSALS=0
+                LAST_RECOVERY_TREND=FLAT
+                PREV_RECOVERY_TREND=FLAT
+            else
+                STATE=STABLE
+                CLASSIFICATION=NORMAL
+            fi
+            ;;
+
+        RISING|HOLD)
+            EVENT_AGE=`expr "$EVENT_AGE" + 2`
+            PERSIST=`expr "$PERSIST" + 1`
+
+            LOAD_SUM=`expr "$LOAD_SUM" + "$LOAD"`
+            LOAD_COUNT=`expr "$LOAD_COUNT" + 1`
+
+            if [ "$LOAD" -gt "$EVENT_MAX_LOAD" ]; then
+                EVENT_MAX_LOAD=$LOAD
+            fi
+
+            if [ "$T5" -gt "$EVENT_PEAK" ]; then
+                EVENT_PEAK=$T5
+            fi
+
+            if [ "$TREND" = "DOWN" ]; then
+                STATE=RECOVERY
+                RECOVERY_AGE=2
+                PREV_RECOVERY_TREND=DOWN
+                LAST_RECOVERY_TREND=DOWN
+            else
+                STATE=HOLD
+            fi
+            ;;
+
+        RECOVERY)
+            RECOVERY_AGE=`expr "$RECOVERY_AGE" + 2`
+
+            if [ "$TREND" = "DOWN" ]; then
+                RECOVERY_DOWN=1
+                LAST_RECOVERY_TREND=DOWN
+            elif [ "$TREND" = "UP" ]; then
+                RECOVERY_DOWN=0
+                LAST_RECOVERY_TREND=UP
+            else
+                RECOVERY_DOWN=0
+                LAST_RECOVERY_TREND=FLAT
+            fi
+
+            if [ "$LAST_RECOVERY_TREND" != "$PREV_RECOVERY_TREND" ]; then
+                if [ "$PREV_RECOVERY_TREND" != "FLAT" ] &&
+                   [ "$LAST_RECOVERY_TREND" != "FLAT" ]; then
+                    RECOVERY_REVERSALS=`expr "$RECOVERY_REVERSALS" + 1`
+                fi
+            fi
+
+            PREV_RECOVERY_TREND=$LAST_RECOVERY_TREND
+
+            BASE_LIMIT=`expr "$EVENT_BASE" + 200`
+
+            if [ "$END" -le "$BASE_LIMIT" ]; then
+                STATE=RECOVERED
+
+                RISE=`expr "$EVENT_PEAK" - "$EVENT_BASE"`
+                AVG_LOAD=`expr "$LOAD_SUM" / "$LOAD_COUNT"`
+
+                if [ "$RECOVERY_REVERSALS" -ge 2 ]; then
+                    CLASSIFICATION=OSCILLATING_RECOVERY
+                elif [ "$RECOVERY_AGE" -gt 30 ]; then
+                    CLASSIFICATION=SLOW_RECOVERY
+                else
+                    CLASSIFICATION=NORMAL
+                fi
+
+                if [ "$RISE" -ge 1000 ] &&
+                   [ "$AVG_LOAD" -le 20 ]; then
+                    echo "`now` EVENT=$EVENT_ID CLASS=$CLASSIFICATION BASE=`show_temp "$EVENT_BASE"`C PEAK=`show_temp "$EVENT_PEAK"`C RISE=`show_temp "$RISE"`C EVENT_AGE=${EVENT_AGE}s PERSIST=$PERSIST AVG_LOAD=${AVG_LOAD}% MAX_LOAD=${EVENT_MAX_LOAD}% RECOVERY=${RECOVERY_AGE}s REVERSALS=$RECOVERY_REVERSALS" >> "$LOG"
+                fi
+            fi
+            ;;
+
+        *)
+            STATE=STABLE
+            CLASSIFICATION=NORMAL
+            ;;
+    esac
+done
+EOF_DETECTOR
+}
+
+write_rc()
+{
+cat > "$RCS" <<'EOF_RCS'
+#!/bin/sh
+
+PIDFILE=/var/run/cpu-temp-detector.pid
+DAEMON=/usr/local/bin/cpu-temp-detector
+
+is_running()
+{
+    [ -r "$PIDFILE" ] || return 1
+    pid=`cat "$PIDFILE" 2>/dev/null`
+    case "$pid" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+    kill -0 "$pid" 2>/dev/null
+}
+
+start()
+{
+    if is_running; then
+        echo "cpu-temp-detector: already running."
+        return 0
+    fi
+
+    rm -f "$PIDFILE"
+
+    "$DAEMON" >/dev/null 2>&1 &
+    pid=$!
+    echo "$pid" > "$PIDFILE"
+
+    sleep 1
+
+    if kill -0 "$pid" 2>/dev/null; then
+        echo "cpu-temp-detector: started (PID $pid)."
+        return 0
+    fi
+
+    rm -f "$PIDFILE"
+    echo "cpu-temp-detector: failed to start." >&2
+    return 1
+}
+
+stop()
+{
+    if ! is_running; then
+        rm -f "$PIDFILE"
+        echo "cpu-temp-detector: not running."
+        return 0
+    fi
+
+    pid=`cat "$PIDFILE"`
+    kill "$pid" 2>/dev/null
+    rm -f "$PIDFILE"
+    echo "cpu-temp-detector: stopped."
+}
+
+status()
+{
+    if is_running; then
+        pid=`cat "$PIDFILE"`
+        echo "cpu-temp-detector: running (PID $pid)."
+        return 0
+    fi
+
+    echo "cpu-temp-detector: not running."
+    return 1
+}
+
+case "$1" in
+    start)  start ;;
+    stop)   stop ;;
+    restart) stop; start ;;
+    status) status ;;
+    *) echo "Usage: $0 {start|stop|restart|status}"; exit 1 ;;
+esac
+
+exit $?
+EOF_RCS
+}
+
+integrate_rcm()
+{
+    grep -F "$HOOK" "$RCM" >/dev/null 2>&1 &&
+    grep -F "$HOOK2" "$RCM" >/dev/null 2>&1 && return 0
+
+    backup_file "$RCM"
+
+    # Slackware 15.0 stock rc.M ends with "# All done.".
+    # Insert immediately before that marker, i.e. after rc.local.
+    # Do not replace the rc.M inode: preserving its mode is important
+    # because init must be able to execute /etc/rc.d/rc.M at boot.
+    awk '
+    {
+        if ($0 ~ /^# All done[.]$/ && !done) {
+            print "# Start CPU temperature detector."
+            print "if [ -x /etc/rc.d/rc.cpu-temp-detector ]; then"
+            print "  /etc/rc.d/rc.cpu-temp-detector start"
+            print "fi"
+            print ""
+            done=1
+        }
+        print
+    }
+    END {
+        if (!done) exit 2
+    }
+    ' "$RCM" > "$RCM.tmp.$$" || {
+        rm -f "$RCM.tmp.$$"
+        die "could not find safe rc.M insertion point (# All done.)"
+    }
+
+    sh -n "$RCM.tmp.$$" || {
+        rm -f "$RCM.tmp.$$"
+        die "generated rc.M is not valid shell"
+    }
+
+    # Keep the original rc.M permissions/owner/group.
+    cat "$RCM.tmp.$$" > "$RCM" || {
+        rm -f "$RCM.tmp.$$"
+        die "cannot install modified rc.M"
+    }
+
+    rm -f "$RCM.tmp.$$"
+
+    # Safety check: rc.M must remain executable.
+    [ -x "$RCM" ] || die "rc.M lost executable permission"
+}
+
+need_root
+
+echo "=========================================="
+echo " install-cpu_temp"
+echo " Slackware 15.0 Stable"
+echo "=========================================="
+echo
+echo "POSIX sh + KISS"
+echo
+
+[ -f "$RCM" ] || die "$RCM not found"
+
+echo "Installing cpu-temp..."
+write_cpu_temp
+chmod 755 "$CPU_TEMP" || die "chmod failed: $CPU_TEMP"
+sh -n "$CPU_TEMP" || die "syntax error: $CPU_TEMP"
+echo "OK: $CPU_TEMP"
+
+echo "Installing cpu-temp-detector..."
+write_detector
+chmod 755 "$DETECTOR" || die "chmod failed: $DETECTOR"
+sh -n "$DETECTOR" || die "syntax error: $DETECTOR"
+echo "OK: $DETECTOR"
+
+echo "Installing rc.cpu-temp-detector..."
+write_rc
+chmod 755 "$RCS" || die "chmod failed: $RCS"
+sh -n "$RCS" || die "syntax error: $RCS"
+echo "OK: $RCS"
+
+echo "Preparing log..."
+touch "$LOG" || die "cannot create $LOG"
+chmod 644 "$LOG" || die "chmod failed: $LOG"
+echo "OK: $LOG"
+
+echo "Checking rc.M integration..."
+integrate_rcm
+sh -n "$RCM" || die "rc.M syntax check failed"
+echo "OK: rc.M"
+
+echo
+echo "Starting detector now..."
+"$RCS" start || die "detector did not start"
+
+echo
+echo "=========================================="
+echo " install-cpu_temp: INSTALLATION SUCCESSFUL"
+echo "=========================================="
+echo
+echo "Installed:"
+echo "  $CPU_TEMP"
+echo "  $DETECTOR"
+echo "  $RCS"
+echo "  $LOG"
+echo
+echo "Integrated:"
+echo "  $RCM"
+echo
+echo "GenMon:"
+echo "  Pango markup is supplied through <txt>...</txt>."
+echo "  No GenMon checkbox is required."
+echo "  The panel display uses:"
+echo "    <60 C  = green"
+echo "    60-79 C = orange"
+echo "    >=80 C = red"
+echo
+echo "Useful commands:"
+echo "  $RCS status"
+echo "  tail -f $LOG"
+echo
+echo "No rc.d executable bits were changed."
+echo "No rc.inet1/rc.inet2 changes were made."
+echo
+exit 0

@@ -1,0 +1,29 @@
+#!/bin/sh
+
+XORG_CONF="/etc/X11/xorg.conf"
+
+# 1. Instantiating a fallback storage tracking image in standard Slackware style
+if [ -f "$XORG_CONF" ]; then
+    sudo cp "$XORG_CONF" "${XORG_CONF}.bak"
+    echo "[+] Protective fallback security backup file created at: ${XORG_CONF}.bak"
+fi
+
+# 2. Applying modifications utilizing POSIX standard parsing tools safely
+echo "[+] Committing performance adjustments inside system file: $XORG_CONF..."
+
+sudo sed -e '/Section "ServerLayout"/a \
+    Option          "BlankTime"     "0"\
+    Option          "StandbyTime"   "0"\
+    Option          "SuspendTime"   "0"\
+    Option          "OffTime"       "0"' \
+         -e '/Option.*"DPMS"$/d' \
+         -e '/Section "Monitor"/a \
+    Option          "NODPMS"' "$XORG_CONF" | sudo tee "${XORG_CONF}.new" > /dev/null
+
+# Swap target layout sheets into operational positions safely
+sudo mv "${XORG_CONF}.new" "$XORG_CONF"
+
+# 3. Restoring standard operational file property permission rules to server file
+sudo chmod 644 "$XORG_CONF"
+
+echo "[ OK ] Configuration processing completed successfully!"

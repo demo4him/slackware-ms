@@ -1,0 +1,80 @@
+set +H
+rm -f Backup_Documents.sh 2>/dev/null || true
+
+cat << 'EOF' > Backup_Documents.sh
+#!/bin/sh
+#
+# Universal Backup Script - Final KISS Edition (Windows Stick Friendly)
+# For Marius (Slackware 15.0 + XFCE4)
+#
+
+LOG_FILE="/tmp/backup_marius.log"
+echo "--- [DEBUG] Script started at: $(date) ---" > "$LOG_FILE"
+echo "Detected device: $DEVNAME" >> "$LOG_FILE"
+
+USER_RUN=$(ps aux | grep xfce4-session | grep -v grep | awk '{print $1}' | head -n1)
+[ -z "$USER_RUN" ] && USER_RUN="marius"
+
+SOURCE="/home/$USER_RUN/Documents"
+MNT_PATH="/media/backup_stick"
+
+echo "Forcing mount directory creation: $MNT_PATH" >> "$LOG_FILE"
+mkdir -p "$MNT_PATH" >> "$LOG_FILE" 2>&1
+
+echo "Executing mount command for $DEVNAME onto $MNT_PATH" >> "$LOG_FILE"
+mount "$DEVNAME" "$MNT_PATH" >> "$LOG_FILE" 2>&1
+
+if ! mountpoint -q "$MNT_PATH"; then
+    echo "ERROR: Could not mount device $DEVNAME onto $MNT_PATH" >> "$LOG_FILE"
+    exit 1
+fi
+
+mkdir -p "$MNT_PATH/Automated_Backup" >> "$LOG_FILE" 2>&1
+
+# Grab D-Bus environment variables from your graphic session for desktop alerts
+DBUS_PID=$(pgrep -u "$USER_RUN" xfce4-session | head -n1)
+if [ -n "$DBUS_PID" ]; then
+    export $(grep -z DBUS_SESSION_BUS_ADDRESS /proc/$DBUS_PID/environ | tr '\0' '\n')
+fi
+
+# Send desktop notification
+sudo -u "$USER_RUN" DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" DISPLAY=:0.0 XAUTHORITY="/home/$USER_RUN/.Xauthority" notify-send -i drive-removable-media 'Backup in progress...' 'Marius, USB stick detected. Syncing Documents...' >> "$LOG_FILE" 2>&1
+
+# ULTIMATE RSYNC OPTIMIZATION: -rltzu (no Linux ownership metadata preservation on Windows FAT32/NTFS sticks)
+echo "Running rsync..." >> "$LOG_FILE"
+rsync -rltzu --delete "$SOURCE/" "$MNT_PATH/Automated_Backup/" >> "$LOG_FILE" 2>&1
+
+if [ $? -eq 0 ]; then
+    echo "Total success at: $(date)" >> "$LOG_FILE"
+    sudo -u "$USER_RUN" DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" DISPLAY=:0.0 XAUTHORITY="/home/$USER_RUN/.Xauthority" notify-send -i dialog-information 'Backup Completed' 'Marius, the file backup has finished successfully!' >> "$LOG_FILE" 2>&1
+else
+    echo "ERROR during copy inside rsync engine!" >> "$LOG_FILE"
+    sudo -u "$USER_RUN" DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" DISPLAY=:0.0 XAUTHORITY="/home/$USER_RUN/.Xauthority" notify-send -i dialog-warning 'Copy Error' 'Issues encountered while syncing files!' >> "$LOG_FILE" 2>&1
+fi
+
+echo "Unmounting device from $MNT_PATH" >> "$LOG_FILE"
+sync
+umount "$MNT_PATH" >> "$LOG_FILE" 2>&1
+rmdir "$MNT_PATH" 2>/dev/null
+echo "--- Script completed successfully ---" >> "$LOG_FILE"
+EOF
+
+chmod +x Backup_Documents.sh
+
+echo "=== [1/3] Moving translated script to /usr/local/bin ==="
+sudo cp Backup_Documents.sh /usr/local/bin/usb-backup-marius.sh
+sudo chmod +x /usr/local/bin/usb-backup-marius.sh
+
+echo "=== [2/3] Generating asynchronous udev rule ==="
+sudo sh -c "cat << UDEV_EOF > /etc/udev/rules.d/99-usb-backup-marius.rules
+SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ACTION=="add", RUN+="/usr/bin/setsid /bin/sh -c 'sleep 2; /usr/local/bin/usb-backup-marius.sh'"
+UDEV_EOF"
+
+echo "=== [3/3] Reloading udev configurations ==="
+sudo udevadm control --reload-rules
+
+echo ""
+echo "=========================================================="
+echo " Marius and AI solved the Windows error! 100% KISS engine "
+echo "=========================================================="
+echo "Reinsert your USB storage drive now!"

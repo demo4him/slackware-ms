@@ -1,0 +1,74 @@
+set +H
+rm -f instaleaza_qogir.sh 2>/dev/null || true
+
+cat << 'EOF' > instaleaza_qogir.sh
+#!/bin/sh
+
+# ==============================================================================
+# AUTOMATED QOGIR ICONS INSTALLATION SCRIPT (DEMO4HIM PERSONAL REPO - KISS)
+# Author: Marius & AI | Environment: Pure Bash / POSIX-like / BSD style (No Systemd)
+# Esthetics: ANSI Color Enhanced - Personal Repo, Direct Extraction & Sleep 4 v4.0
+# ==============================================================================
+
+set -e
+
+# Standard ANSI Colors (POSIX-safe)
+CLR_RESET="\033[0m"
+CLR_INFO="\033[1;34m"    # Bold Blue
+CLR_SUCCESS="\033[1;32m" # Bold Green
+CLR_WARN="\033[1;33m"    # Bold Yellow
+CLR_TEXT="\033[0;36m"    # Cyan
+
+print_step() {
+    printf "${1}%s${CLR_RESET}\n" "$2"
+    logger -t qogir_icons_personal -p "user.${3}" "$2"
+}
+
+print_step "$CLR_INFO" "[i] --- INITIALIZING INSTALLATION FROM DEMO4HIM REPOSITORY ---" "info"
+
+# Absolute raw target address of your personal archive file hosted on GitHub
+URL_PERSONAL="https://github.com/demo4him/slackware-ms/raw/refs/heads/main/01-Qogir.tar.xz"
+
+TMP_DIR="/tmp/qogir-personal-build"
+TARGET_DIR="/usr/share/icons"
+
+# 1. Temporary environment sandbox preparation
+rm -rf "$TMP_DIR"
+mkdir -p "$TMP_DIR"
+
+# 2. Direct download pulling from your personal GitHub account (KISS - instantaneous and redirection-safe)
+print_step "$CLR_INFO" "[>] Downloading secure archive 01-Qogir.tar.xz from your repository..." "info"
+wget -q --show-progress -O "$TMP_DIR/Qogir.tar.xz" "$URL_PERSONAL"
+
+# 3. Native XZ decompression extracting straight into global system directories
+print_step "$CLR_WARN" "[*] Extracting .tar.xz package into system directory path $TARGET_DIR..." "notice"
+sudo mkdir -p "$TARGET_DIR"
+sudo tar -xJf "$TMP_DIR/Qogir.tar.xz" -C "$TARGET_DIR/"
+
+# 4. GTK/XFCE4 VISIBILITY CORRECTION FIX (Ensures themes aren't hidden from visual picker menus)
+print_step "$CLR_INFO" "[>] Optimizing desktop index.theme configurations..." "info"
+if [ -f "$TARGET_DIR/Qogir/index.theme" ]; then
+    sudo sed -i 's/[Hh]idden=true/#hidden=true/' "$TARGET_DIR/Qogir/index.theme" 2>/dev/null || true
+fi
+if [ -f "$TARGET_DIR/Qogir-dark/index.theme" ]; then
+    sudo sed -i 's/[Hh]idden=true/#hidden=true/' "$TARGET_DIR/Qogir-dark/index.theme" 2>/dev/null || true
+fi
+
+# 5. System graphics server icon cache engine update pass for instant application in XFCE4
+print_step "$CLR_WARN" "[*] Refreshing display server GTK icon caches..." "notice"
+sudo gtk-update-icon-cache -f -t "$TARGET_DIR/Qogir" 2>/dev/null || true
+sudo gtk-update-icon-cache -f -t "$TARGET_DIR/Qogir-dark" 2>/dev/null || true
+
+# Cleanup remaining sandbox installation artifacts
+rm -rf "$TMP_DIR"
+
+print_step "$CLR_SUCCESS" "" "info"
+print_step "$CLR_SUCCESS" "[✓] TOTAL VICTORY! YOUR PERSONAL GITHUB REPOSITORY WORKS FLAWLESSLY!" "info"
+print_step "$CLR_SUCCESS" "[✓] Open Settings -> Appearance -> Icons in XFCE4 and select Qogir." "info"
+print_step "$CLR_SUCCESS" "[✓] Log outputs are waiting in /var/log/messages. Terminal closing in 4 seconds..." "info"
+
+sleep 4
+EOF
+
+chmod +x instaleaza_qogir.sh
+echo "The instaleaza_qogir.sh script has been fully converted to English with absolute path preservation!"

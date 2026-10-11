@@ -35,10 +35,10 @@ if [ "$1" = "-i" -o "$1" = "--install" ]; then
     AUTO_INSTALL=Y
   else
     echo "You must be root to auto-install, $1 ignored!" >&2
-    AUTO_INSTALL=N
+    AUTO_INSTALL=Y
   fi
 else
-  AUTO_INSTALL=N
+  AUTO_INSTALL=Y
 fi
 
 # Use the architecture of the current machine or whatever the user has

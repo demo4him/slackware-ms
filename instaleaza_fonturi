@@ -1,0 +1,103 @@
+set +H
+rm -f /tmp/install-fonts.sh 2>/dev/null || true
+
+cat << 'EOF' > /tmp/install-fonts.sh
+#!/bin/sh
+
+# ==============================================================================
+# AUTOMATED FONT INSTALLATION SCRIPT (OTF/TTF) FOR SLACKWARE 15.0 STABLE
+# Author: Marius & AI | Environment: Pure Bash / POSIX-like / BSD style (No Systemd)
+# Esthetics: ANSI Color Enhanced Terminal output & Syslog (/var/log/messages) v9
+# ==============================================================================
+
+set -e
+
+# Standard ANSI Colors (POSIX-safe)
+CLR_RESET="\033[0m"
+CLR_INFO="\033[1;34m"    # Bold Blue
+CLR_SUCCESS="\033[1;32m" # Bold Green
+CLR_WARN="\033[0;33m"    # Yellow
+CLR_ERROR="\033[1;31m"   # Bold Red
+CLR_TEXT="\033[0;36m"    # Cyan (for file details)
+
+# Dual-output printing engine: Colored terminal and /var/log/messages via syslog
+syslog_print() {
+    COLOR="$1"
+    MESSAGE="$2"
+    LEVEL="$3" # info, warn, err etc.
+    
+    # Print to the terminal with colors
+    printf "${COLOR}%s${CLR_RESET}\n" "$MESSAGE"
+    
+    # Forward to /var/log/messages with the script tag
+    logger -t install_fonts -p "user.${LEVEL}" "$MESSAGE"
+}
+
+# 1. Administrative Privileges Escalation Routing Block (for sudo NOPASSWD)
+if [ "$(id -u)" -ne 0 ]; then
+    printf "${CLR_INFO}[i] Running as non-root user. Auto-sudo activated...${CLR_RESET}\n"
+    exec sudo "$0" "$@"
+fi
+
+syslog_print "$CLR_INFO" "[i] --- START FONT INSTALLATION PROCESS ---" "info"
+
+# 2. Define target source location for your kit fonts
+SOURCE="/home/kituri/slackware/desktop/fonts"
+
+# Source directory validation gate
+if [ ! -d "${SOURCE}" ]; then
+    syslog_print "$CLR_ERROR" "[!] Error: Source directory does not exist: ${SOURCE}" "err"
+    exit 1
+fi
+
+# Define destination targets matching Slackware directory architecture
+DIR_OTF="/usr/share/fonts/OTF"
+DIR_TTF="/usr/share/fonts/TTF"
+
+syslog_print "$CLR_INFO" "[>] Preparing and securing destination directories (755)..." "info"
+mkdir -p "$DIR_OTF" "$DIR_TTF"
+chmod 755 /usr/share/fonts "$DIR_OTF" "$DIR_TTF"
+
+# 3. Filter, loop and copy OpenType (OTF) font files
+syslog_print "$CLR_INFO" "[>] Filtering and copying OpenType fonts (OTF)..." "info"
+find "$SOURCE" -maxdepth 1 -type f \( -name "*.otf" -o -name "*.OTF" \) | while IFS= read -r f; do
+    if [ -f "$f" ]; then
+        FILENAME=$(basename "$f")
+        cp "$f" "${DIR_OTF}/"
+        chmod 644 "${DIR_OTF}/${FILENAME}"
+        syslog_print "$CLR_TEXT" "  → $FILENAME" "info"
+    fi
+done
+
+# 4. Filter, loop and copy TrueType (TTF) font files
+syslog_print "$CLR_INFO" "[>] Filtering and copying TrueType fonts (TTF)..." "info"
+find "$SOURCE" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.TTF" \) | while IFS= read -r f; do
+    if [ -f "$f" ]; then
+        FILENAME=$(basename "$f")
+        cp "$f" "${DIR_TTF}/"
+        chmod 644 "${DIR_TTF}/${FILENAME}"
+        syslog_print "$CLR_TEXT" "  → $FILENAME" "info"
+    fi
+done
+
+# 5. Preventative purge of existing/corrupt fontconfig caches
+syslog_print "$CLR_WARN" "[*] Cleaning old/corrupt fontconfig cache structures..." "notice"
+rm -rf /var/cache/fontconfig/*
+rm -rf /root/.cache/fontconfig/*
+
+# 6. Rebuild system font cache index
+syslog_print "$CLR_WARN" "[*] Forcing complete refresh of system font cache (fc-cache -f -v)..." "notice"
+
+# Run fc-cache and funnel every line of stdout/stderr into terminal and syslog simultaneously
+fc-cache -f -v 2>&1 | while IFS= read -r line; do
+    printf "${CLR_WARN}%s${CLR_RESET}\n" "$line"
+    logger -t install_fonts -p user.info "$line"
+done
+
+syslog_print "$CLR_SUCCESS" "[✓] Complete success! All fonts have been successfully processed and registered into the system." "info"
+EOF
+
+sudo mv /tmp/install-fonts.sh /usr/local/bin/install-fonts
+sudo chmod +x /usr/local/bin/install-fonts
+
+echo "The install-fonts script has been translated to English and successfully deployed to /usr/local/bin/install-fonts!"
