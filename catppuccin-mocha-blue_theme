@@ -1,0 +1,2 @@
+curl -LsS "https://raw.githubusercontent.com/catppuccin/gtk/main/install.py" -o install.py
+python3 install.py mocha blue
